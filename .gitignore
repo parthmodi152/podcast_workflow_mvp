@@ -1,0 +1,42 @@
+# Node.js / React
+node_modules/
+build/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+.env
+venv/
+ENV/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Data and sample data
+/data/
+/sample_data/
+
+# SQLite and DB files
+*.sqlite3
+*.db
+
+# Docker
+*.pid
+
+# Misc
+*.swp
+*.swo
+
+# Ignore coverage reports
+htmlcov/
+.coverage
+coverage.xml
+
+# Ignore local settings
+local_settings.py 

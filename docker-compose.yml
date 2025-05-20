@@ -1,0 +1,119 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: podcast_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6-alpine
+    ports:
+      - "6379:6379"
+
+  voice_service:
+    build:
+      context: ./voice_service
+    ports:
+      - "8001:8000"
+    environment:
+      DATABASE_URL: postgresql://user:password@postgres:5432/podcast_db
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      ELEVEN_API_KEY: ${ELEVEN_API_KEY}
+      MEDIA_DIR: /data
+    volumes:
+      - ./data:/data
+      - ./voice_service/src:/app/src
+    depends_on:
+      - postgres
+      - redis
+
+  script_service:
+    build:
+      context: ./script_service
+    ports:
+      - "8002:8000"
+    environment:
+      DATABASE_URL: postgresql://user:password@postgres:5432/podcast_db
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    volumes:
+      - ./script_service/src:/app/src
+    depends_on:
+      - postgres
+      - redis
+
+  tts_service:
+    build:
+      context: ./tts_service
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      ELEVEN_API_KEY: ${ELEVEN_API_KEY}
+      MEDIA_DIR: /data/podcast-audio
+    volumes:
+      - ./data/podcast-audio:/data/podcast-audio # Mount for worker to write audio
+      - ./tts_service/src:/app/src
+    depends_on:
+      - redis
+
+  avatar_service:
+    build:
+      context: ./avatar_service
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      HEDRA_API_KEY: ${HEDRA_API_KEY}
+      MEDIA_AUDIO_DIR: /data/podcast-audio
+      MEDIA_VIDEO_DIR: /data/podcast-video
+    volumes:
+      - ./data/podcast-audio:/data/podcast-audio # Mount for worker to read audio
+      - ./data/podcast-video:/data/podcast-video # Mount for worker to write video
+      - ./avatar_service/src:/app/src
+    depends_on:
+      - redis
+
+  stitch_service:
+    build:
+      context: ./stitch_service
+    environment:
+      DATABASE_URL: postgresql://user:password@postgres:5432/podcast_db
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      MEDIA_VIDEO_DIR: /data/podcast-video
+      MEDIA_FINAL_DIR: /data/podcast-final
+    volumes:
+      - ./data/podcast-video:/data/podcast-video # Mount for worker to read videos
+      - ./data/podcast-final:/data/podcast-final # Mount for worker to write final video
+      - ./stitch_service/src:/app/src
+    depends_on:
+      - postgres
+      - redis
+
+  react_admin_ui:
+    build:
+      context: ./react_admin_ui
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_VOICE_SERVICE_URL: http://localhost:8001
+      REACT_APP_SCRIPT_SERVICE_URL: http://localhost:8002
+      # Add other service URLs as needed for the UI
+    volumes:
+      - ./react_admin_ui/src:/app/src
+      - ./react_admin_ui/public:/app/public
+    depends_on:
+      - voice_service
+      - script_service
+
+volumes:
+  postgres_data:
+

@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "tts_service"
+version = "0.1.0"
+description = "Service for generating audio per script line using ElevenLabs"
+authors = ["Manus AI"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.100" # Though a worker, might have health checks or utility endpoints
+uvicorn = {extras = ["standard"], version = "^0.22"}
+pydantic = "^2.0"
+httpx = "^0.24"
+celery = "^5.3"
+redis = "^4.6"
+elevenlabs = "*"  # Added ElevenLabs SDK
+sqlalchemy = "^2.0"
+psycopg2-binary = "^2.9.5" # For Postgres
+python-multipart = "0.0.20"
+# boto3 and botocore are removed as S3 is not used
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

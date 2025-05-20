@@ -1,0 +1,236 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-1234-abcdef123456",
+		"name": "Podcast Workflow MVP",
+		"description": "Postman collection for testing the Podcast Workflow MVP services locally.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Voice Service (localhost:8001)",
+			"item": [
+				{
+					"name": "Clone Voice",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "My Test Voice",
+									"type": "text"
+								},
+								{
+									"key": "speaker_image",
+									"type": "file",
+									"src": [],
+									"description": "(Optional) Speaker image file (JPEG, PNG, WebP) for avatar generation."
+								},
+								{
+									"key": "files",
+									"type": "file",
+									"src": [],
+									"description": "Select one or more MP3/WAV audio files."
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8001/voices",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8001",
+							"path": [
+								"voices"
+							]
+						},
+						"description": "Uploads audio files to clone a new voice using ElevenLabs. Optionally include a speaker image file for avatar generation."
+					},
+					"response": []
+				},
+				{
+					"name": "List Voices",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8001/voices",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8001",
+							"path": [
+								"voices"
+							]
+						},
+						"description": "Retrieves a list of all cloned voices from the database."
+					},
+					"response": []
+				},
+				{
+					"name": "Health Check (Voice Service)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8001/health",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8001",
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Script Service (localhost:8002)",
+			"item": [
+				{
+					"name": "Create Script",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Exploring the Cosmos\",\n    \"length_minutes\": 10,\n    \"speakers\": [\n        {\"role\": \"Narrator\", \"voice_id\": \"your_cloned_voice_id_1\"},\n        {\"role\": \"Expert\", \"voice_id\": \"your_cloned_voice_id_2\"}\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8002/scripts",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8002",
+							"path": [
+								"scripts"
+							]
+						},
+						"description": "Creates a new podcast script using OpenAI and dispatches TTS tasks."
+					},
+					"response": []
+				},
+				{
+					"name": "List Scripts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8002/scripts",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8002",
+							"path": [
+								"scripts"
+							]
+						},
+						"description": "Retrieves a list of all scripts and their statuses."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Script Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8002/scripts/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8002",
+							"path": [
+								"scripts",
+								"1"
+							]
+						},
+						"description": "Retrieves detailed information for a specific script, including its lines and their statuses. Replace '1' with an actual script ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Health Check (Script Service)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8002/health",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8002",
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "VOICE_ID_1",
+			"value": "your_cloned_voice_id_1",
+			"type": "string",
+			"description": "Replace with an actual voice_id obtained from the Voice Service."
+		},
+		{
+			"key": "VOICE_ID_2",
+			"value": "your_cloned_voice_id_2",
+			"type": "string",
+			"description": "Replace with another actual voice_id."
+		},
+		{
+			"key": "SCRIPT_ID",
+			"value": "1",
+			"type": "string",
+			"description": "Replace with an actual script_id obtained from the Script Service."
+		}
+	]
+}
