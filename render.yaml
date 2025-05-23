@@ -9,7 +9,7 @@ services:
     envVars:
       - key: DATABASE_URL
         sync: false
-      - key: ELEVENLABS_API_KEY
+      - key: ELEVEN_API_KEY
         sync: false
         
   # Script Service  
@@ -22,6 +22,8 @@ services:
     envVars:
       - key: DATABASE_URL
         sync: false
+      - key: OPENAI_API_KEY
+        sync: false
           
   # TTS Service
   - type: web
@@ -33,7 +35,7 @@ services:
     envVars:
       - key: DATABASE_URL
         sync: false
-      - key: ELEVENLABS_API_KEY
+      - key: ELEVEN_API_KEY
         sync: false
       - key: MEDIA_AUDIO_DIR
         value: "/tmp/podcast-audio"
