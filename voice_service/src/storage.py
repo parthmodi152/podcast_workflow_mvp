@@ -36,7 +36,13 @@ class SupabaseStorage:
                 public_url = self.supabase.storage.from_(
                     self.bucket_name
                 ).get_public_url(file_name)
+
+                # Clean any trailing characters that might cause issues
+                if public_url:
+                    public_url = public_url.rstrip("?")
+
                 logger.info(f"Successfully uploaded {file_name} to Supabase Storage")
+                logger.info(f"Public URL: {public_url}")
                 return public_url
             else:
                 logger.error(f"Failed to upload {file_name}")

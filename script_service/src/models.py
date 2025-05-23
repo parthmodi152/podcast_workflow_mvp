@@ -14,10 +14,11 @@ class ScriptModel(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     title = Column(String, nullable=False)
     length_minutes = Column(Integer, nullable=False)
-    format_type = Column(String, nullable=False)  # 'interview', 'roundtable', 'article'
-    status = Column(String, default="pending")  # pending, processing, complete, failed
+    format_type = Column(String, nullable=False)  # interview/roundtable
+    status = Column(String, default="pending")  # pending/processing/complete
     raw_script_json = Column(Text)  # Stores the full JSON from OpenAI
-    questionnaire_json = Column(Text, nullable=True)  # Stores questionnaire answers
+    questionnaire_json = Column(Text, nullable=True)  # Questionnaire answers
+    final_video_path = Column(String, nullable=True)  # Final video path
     lines = relationship("ScriptLineModel", back_populates="script")
 
 
