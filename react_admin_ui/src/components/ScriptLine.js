@@ -27,21 +27,25 @@ function ScriptLine({ line, index, isEditing, onEdit, onSave, onCancel, onStatus
   };
 
   const handlePlayPause = async () => {
+    // Use the direct audio file path from the database
+    if (!line.audio_file_path) {
+      alert('Audio file not available. Please ensure TTS has completed successfully.');
+      return;
+    }
+
     if (!audioRef.current) {
-      // Get the audio URL - this will handle the redirect
-      const audioUrl = scriptService.getAudioUrl(line.line_id);
-      audioRef.current = new Audio(audioUrl);
+      audioRef.current = new Audio(line.audio_file_path);
       
       audioRef.current.addEventListener('ended', () => setIsPlaying(false));
       audioRef.current.addEventListener('error', (e) => {
         setIsPlaying(false);
         console.error('Audio playback error:', e);
-        alert('Error playing audio file. Please check if TTS was successful.');
+        alert('Error playing audio file. The audio URL might be invalid.');
       });
 
-      // Add load event listener to handle redirects better
+      // Add load event listener to handle loading better
       audioRef.current.addEventListener('loadstart', () => {
-        console.log('Audio loading started');
+        console.log('Audio loading started from:', line.audio_file_path);
       });
       audioRef.current.addEventListener('canplay', () => {
         console.log('Audio can play');
@@ -188,12 +192,17 @@ function ScriptLine({ line, index, isEditing, onEdit, onSave, onCancel, onStatus
   };
 
   const handleOpenVideo = async () => {
+    // Use the direct video file path from the database
+    if (!line.video_file_path) {
+      alert('Video file not available. Please ensure avatar generation has completed successfully.');
+      return;
+    }
+
     try {
-      const videoUrl = scriptService.getVideoUrl(line.line_id);
       // Test if the video URL is accessible before opening
-      const response = await fetch(videoUrl, { method: 'HEAD' });
+      const response = await fetch(line.video_file_path, { method: 'HEAD' });
       if (response.ok) {
-        window.open(videoUrl, '_blank');
+        window.open(line.video_file_path, '_blank');
       } else {
         alert('Video file not found or not accessible yet.');
       }
@@ -302,7 +311,7 @@ function ScriptLine({ line, index, isEditing, onEdit, onSave, onCancel, onStatus
             {getTTSStatusIcon()}
           </div>
           <div className="tts-actions">
-            {ttsStatus === 'complete' && (
+            {ttsStatus === 'complete' && line.audio_file_path && (
               <button 
                 className="btn-icon btn-play"
                 onClick={handlePlayPause}
@@ -326,7 +335,7 @@ function ScriptLine({ line, index, isEditing, onEdit, onSave, onCancel, onStatus
             {getFrameStatusIcon()}
           </div>
           <div className="frame-actions">
-            {frameStatus === 'complete' && (
+            {frameStatus === 'complete' && line.video_file_path && (
               <button 
                 className="btn-icon btn-video"
                 onClick={handleOpenVideo}
