@@ -14,6 +14,13 @@ export const generateDefaultImage = () => {
 // Get image URL with fallback to default
 export const getImageUrl = (imagePath, baseUrl = API_CONFIG.VOICE_SERVICE) => {
   if (!imagePath) return generateDefaultImage();
+  
+  // If imagePath is already a full URL (starts with http/https), return it as-is
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+  
+  // Otherwise, it's a relative path, so prepend the base URL
   return `${baseUrl}${imagePath}`;
 };
 
