@@ -45,12 +45,17 @@ export const scriptService = {
 
   // Generate TTS for a script
   async generateTTS(scriptId) {
-    const response = await fetch(`${BASE_URL}/scripts/${scriptId}/generate-tts`, {
+    // Call TTS service directly instead of going through script service proxy
+    const response = await fetch(`${TTS_BASE_URL}/tts/process-script/${scriptId}`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
     if (!response.ok) {
-      throw new Error(`Error generating TTS: ${response.statusText}`);
+      const errorData = await response.json();
+      throw new Error(errorData.detail || `Error generating TTS: ${response.statusText}`);
     }
 
     return response.json();
