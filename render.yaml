@@ -11,6 +11,10 @@ services:
         sync: false
       - key: ELEVEN_API_KEY
         sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
         
   # Script Service  
   - type: web
@@ -37,8 +41,10 @@ services:
         sync: false
       - key: ELEVEN_API_KEY
         sync: false
-      - key: MEDIA_AUDIO_DIR
-        value: "/tmp/podcast-audio"
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
         
   # Avatar Service
   - type: web
@@ -52,10 +58,10 @@ services:
         sync: false
       - key: HEDRA_API_KEY
         sync: false
-      - key: MEDIA_AUDIO_DIR
-        value: "/tmp/podcast-audio"
-      - key: MEDIA_VIDEO_DIR
-        value: "/tmp/podcast-video"
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
         
   # Stitch Service
   - type: web
@@ -67,7 +73,7 @@ services:
     envVars:
       - key: DATABASE_URL
         sync: false
-      - key: MEDIA_VIDEO_DIR
-        value: "/tmp/podcast-video"
-      - key: MEDIA_FINAL_DIR
-        value: "/tmp/podcast-final" 
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false 

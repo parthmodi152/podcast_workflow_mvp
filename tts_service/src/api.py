@@ -2,10 +2,9 @@
 import logging
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-import os
 
 from .database import get_db
 from .models import ScriptLineModel
@@ -119,18 +118,17 @@ async def get_line_tts_status(line_id: int, db: Session = Depends(get_db)):
 
 @app.get("/tts/audio/{line_id}")
 async def get_line_audio(line_id: int, db: Session = Depends(get_db)):
-    """Serve audio file for a specific line"""
+    """Redirect to audio file URL in Supabase Storage"""
     line = db.query(ScriptLineModel).filter(ScriptLineModel.id == line_id).first()
 
     if not line:
         raise HTTPException(status_code=404, detail=f"Line {line_id} not found")
 
-    if not line.audio_file_path or not os.path.exists(line.audio_file_path):
+    if not line.audio_file_path:
         raise HTTPException(status_code=404, detail="Audio file not found")
 
-    return FileResponse(
-        line.audio_file_path, media_type="audio/mpeg", filename=f"line_{line_id}.mp3"
-    )
+    # Redirect to the Supabase Storage URL
+    return RedirectResponse(url=line.audio_file_path)
 
 
 @app.get("/health")

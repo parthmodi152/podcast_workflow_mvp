@@ -1,11 +1,13 @@
 # /home/ubuntu/podcast_workflow_mvp/stitch_service/src/stitch_processor.py
 import os
 import logging
+import tempfile
 from sqlalchemy import update, func
 from sqlalchemy.orm import Session
 from moviepy import VideoFileClip, concatenate_videoclips
 
 from .models import ScriptModel, ScriptLineModel
+from .storage import get_storage
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -82,7 +84,7 @@ def check_stitch_readiness(db: Session, script_id: int) -> dict:
 def perform_stitch(db: Session, script_id: int) -> dict:
     """
     Perform the video stitching for a script using MoviePy.
-    This preserves all original video properties without modifications.
+    Downloads videos from Supabase, stitches them, and uploads final video.
     """
     logger.info(f"Starting MoviePy stitch process for script_id: {script_id}")
 
@@ -98,6 +100,9 @@ def perform_stitch(db: Session, script_id: int) -> dict:
         .values(status="stitching")
     )
     db.commit()
+
+    storage = get_storage()
+    temp_files = []  # Keep track of temp files for cleanup
 
     try:
         # Get all video files for the script, ordered by line_order
@@ -125,13 +130,49 @@ def perform_stitch(db: Session, script_id: int) -> dict:
 
             return {"status": "error", "message": error_msg}
 
-        # Load all video clips
+        # Download and load all video clips
         video_clips = []
         for i, line in enumerate(lines):
-            if line.video_file_path and os.path.exists(line.video_file_path):
-                logger.info(f"Loading clip {i+1}/{len(lines)}: {line.video_file_path}")
+            if line.video_file_path:
+                logger.info(
+                    f"Downloading clip {i+1}/{len(lines)}: {line.video_file_path}"
+                )
+
+                # Download video from Supabase
+                video_data = storage.download_file(line.video_file_path)
+
+                if not video_data:
+                    error_msg = f"Failed to download video for line {line.id}: {line.video_file_path}"
+                    logger.error(error_msg)
+
+                    # Clean up any loaded clips and temp files
+                    for clip in video_clips:
+                        clip.close()
+                    for temp_file in temp_files:
+                        try:
+                            os.unlink(temp_file)
+                        except:
+                            pass
+
+                    db.execute(
+                        update(ScriptModel)
+                        .where(ScriptModel.id == script_id)
+                        .values(status="stitching_failed")
+                    )
+                    db.commit()
+
+                    return {"status": "error", "message": error_msg}
+
+                # Create temporary file for MoviePy
+                with tempfile.NamedTemporaryFile(
+                    suffix=".mp4", delete=False
+                ) as temp_video:
+                    temp_video.write(video_data)
+                    temp_video_path = temp_video.name
+                    temp_files.append(temp_video_path)
+
                 try:
-                    clip = VideoFileClip(line.video_file_path)
+                    clip = VideoFileClip(temp_video_path)
                     video_clips.append(clip)
                     logger.info(
                         f"Loaded clip: {line.video_file_path} (duration: {clip.duration:.2f}s)"
@@ -140,9 +181,14 @@ def perform_stitch(db: Session, script_id: int) -> dict:
                     error_msg = f"Failed to load video {line.video_file_path}: {str(e)}"
                     logger.error(error_msg)
 
-                    # Clean up any loaded clips
+                    # Clean up any loaded clips and temp files
                     for clip in video_clips:
                         clip.close()
+                    for temp_file in temp_files:
+                        try:
+                            os.unlink(temp_file)
+                        except:
+                            pass
 
                     db.execute(
                         update(ScriptModel)
@@ -153,14 +199,17 @@ def perform_stitch(db: Session, script_id: int) -> dict:
 
                     return {"status": "error", "message": error_msg}
             else:
-                error_msg = (
-                    f"Video file missing for line {line.id}: {line.video_file_path}"
-                )
+                error_msg = f"Video file path missing for line {line.id}"
                 logger.error(error_msg)
 
-                # Clean up any loaded clips
+                # Clean up any loaded clips and temp files
                 for clip in video_clips:
                     clip.close()
+                for temp_file in temp_files:
+                    try:
+                        os.unlink(temp_file)
+                    except:
+                        pass
 
                 db.execute(
                     update(ScriptModel)
@@ -184,21 +233,21 @@ def perform_stitch(db: Session, script_id: int) -> dict:
 
             return {"status": "error", "message": error_msg}
 
-        # Prepare output path
-        output_episode_path = os.path.join(
-            MEDIA_FINAL_DIR, f"{script_id}_final_episode.mp4"
-        )
-
         logger.info(f"Concatenating {len(video_clips)} clips with MoviePy...")
 
         # Concatenate all clips preserving original properties
         final_clip = concatenate_videoclips(video_clips, method="compose")
 
-        logger.info(f"Writing final video to: {output_episode_path}")
+        # Create temporary file for final video
+        with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as temp_final:
+            temp_final_path = temp_final.name
+            temp_files.append(temp_final_path)
+
+        logger.info(f"Writing final video to temporary file")
 
         # Write the final video file
         final_clip.write_videofile(
-            output_episode_path,
+            temp_final_path,
             codec="libx264",
             audio_codec="aac",
             temp_audiofile="temp-audio.m4a",
@@ -210,22 +259,42 @@ def perform_stitch(db: Session, script_id: int) -> dict:
         for clip in video_clips:
             clip.close()
 
+        # Upload final video to Supabase Storage
+        with open(temp_final_path, "rb") as f:
+            final_video_data = f.read()
+
+        filename = f"{script_id}_final_episode.mp4"
+        public_url = storage.upload_file(final_video_data, filename, "video/mp4")
+
+        if not public_url:
+            error_msg = "Failed to upload final video to Supabase Storage"
+            logger.error(error_msg)
+
+            db.execute(
+                update(ScriptModel)
+                .where(ScriptModel.id == script_id)
+                .values(status="stitching_failed")
+            )
+            db.commit()
+
+            return {"status": "error", "message": error_msg}
+
         logger.info(
-            f"Successfully stitched video for script {script_id}: {output_episode_path}"
+            f"Successfully uploaded final video for script {script_id}: {public_url}"
         )
 
         # Update script status to complete
         db.execute(
             update(ScriptModel)
             .where(ScriptModel.id == script_id)
-            .values(status="complete", final_video_path=output_episode_path)
+            .values(status="complete", final_video_path=public_url)
         )
         db.commit()
 
         return {
             "status": "complete",
             "message": "Successfully created final video with MoviePy",
-            "final_video_path": output_episode_path,
+            "final_video_path": public_url,
         }
 
     except Exception as e:
@@ -250,3 +319,12 @@ def perform_stitch(db: Session, script_id: int) -> dict:
         db.commit()
 
         return {"status": "error", "message": error_msg}
+
+    finally:
+        # Clean up all temporary files
+        for temp_file in temp_files:
+            try:
+                os.unlink(temp_file)
+                logger.debug(f"Cleaned up temp file: {temp_file}")
+            except Exception as e:
+                logger.warning(f"Failed to clean up temp file {temp_file}: {e}")

@@ -260,3 +260,18 @@ class HedraService:
                 f.write(response.content)
 
             return output_path
+
+    async def download_video_data(self, video_url: str) -> bytes:
+        """
+        Download a video from a URL and return as bytes.
+
+        Args:
+            video_url: URL of the video to download
+
+        Returns:
+            Video data as bytes
+        """
+        async with httpx.AsyncClient() as client:
+            response = await client.get(video_url, timeout=300.0)
+            response.raise_for_status()
+            return response.content

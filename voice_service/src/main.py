@@ -3,7 +3,6 @@ from typing import List, Annotated, Optional
 
 from fastapi import FastAPI, File, Form, UploadFile, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
 # Import from our modules
@@ -21,7 +20,6 @@ from .utils import (
     cleanup_temp_files,
     save_speaker_image,
     cleanup_speaker_image,
-    IMAGES_DIR,
 )
 from .elevenlabs_client import ElevenLabsClient
 
@@ -33,9 +31,6 @@ ensure_media_directories()
 
 # Create FastAPI app
 app = FastAPI(title="Voice Service")
-
-# Mount static files for serving images
-app.mount("/speaker-images", StaticFiles(directory=IMAGES_DIR), name="speaker-images")
 
 # Add CORS middleware
 app.add_middleware(

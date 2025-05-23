@@ -3,7 +3,6 @@ name = "stitch_service"
 version = "0.1.0"
 description = "Service for concatenating video clips using FFmpeg"
 authors = ["Your Name <your.email@example.com>"]
-readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -14,6 +13,8 @@ psycopg2-binary = "^2.9.7"
 pydantic = "^2.3.0"
 python-multipart = "^0.0.6"
 moviepy = "^2.2.0"
+supabase = "^2.0.0"  # For Supabase Storage
+httpx = "^0.24.1"  # For downloading files
 # FFmpeg is a system dependency, installed in Dockerfile
 
 [build-system]
