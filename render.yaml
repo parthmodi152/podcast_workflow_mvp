@@ -70,10 +70,4 @@ services:
       - key: MEDIA_VIDEO_DIR
         value: "/tmp/podcast-video"
       - key: MEDIA_FINAL_DIR
-        value: "/tmp/podcast-final"
-
-databases:
-  - name: podcast-postgres
-    databaseName: podcast_db
-    user: podcast_user
-    plan: free 
+        value: "/tmp/podcast-final" 
