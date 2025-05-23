@@ -1,24 +1,28 @@
 # Dockerfile for tts_service
-FROM python:3.11-slim
+FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install Poetry
-RUN pip install poetry
+COPY pyproject.toml ./
 
-# Copy only pyproject.toml and poetry.lock (if it exists) to leverage Docker cache
-COPY pyproject.toml poetry.lock* ./
+# Install poetry and dependencies
+RUN pip install --no-cache-dir poetry
+RUN poetry config virtualenvs.create false && \
+    poetry install --only=main --no-root
 
-# Install dependencies using Poetry
-RUN poetry config virtualenvs.create false && poetry install --no-root --without dev
+# Create directories for audio files
+RUN mkdir -p /data/podcast-audio && \
+    chmod -R 777 /data
 
-# Install additional required packages
-RUN pip install sqlalchemy python-multipart celery
+# Copy the package source
+COPY src ./src/
 
-# Copy the rest of the application code
-COPY ./src /app/src
+# Expose the API port
+EXPOSE 8000
 
-# Command to run the Celery worker
-# Change the command to avoid the 'ModuleNotFoundError: No module named 'tts_service''
-CMD celery --workdir=/app -A src.main:celery_app worker -l info -Q tts_queue
+# Set environment variables
+ENV PYTHONPATH=/app
+
+# Command to run the FastAPI server
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
 

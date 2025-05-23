@@ -11,14 +11,18 @@ COPY pyproject.toml poetry.lock* ./
 
 # Install dependencies using Poetry
 # --no-root: Do not install the project itself as editable, install dependencies only
-# --without dev: Skip development dependencies
-RUN poetry config virtualenvs.create false && poetry install --no-root --without dev
+# --only main: Install only main dependencies, skip development dependencies
+RUN poetry config virtualenvs.create false && poetry install --no-root --only=main
 
-# Install additional required packages
-RUN pip install python-multipart
+# Create the data directory
+RUN mkdir -p /data
 
 # Copy the rest of the application code
 COPY ./src /app/src
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV MEDIA_DIR=/data
 
 # Expose the port the app runs on
 EXPOSE 8000

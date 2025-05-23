@@ -12,10 +12,9 @@ pydantic = "^2.0"
 httpx = "^0.24"
 psycopg2-binary = "^2.9.5" # For Postgres
 sqlalchemy = "^2.0"
-celery = "^5.3"
-redis = "^4.6"
 elevenlabs = "*"  # Added ElevenLabs SDK
 python-multipart = "0.0.20"
+python-dotenv = "^1.0.0"  # For loading environment variables
 [tool.poetry.dev-dependencies]
 pytest = "^7.0"
 
