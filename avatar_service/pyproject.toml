@@ -13,7 +13,7 @@ sqlalchemy = "^2.0.20"
 psycopg2-binary = "^2.9.7"
 hedra-python = "^0.1.0"
 pydantic = "^2.3.0"
-httpx = "^0.26.1"
+httpx = "^0.28.1"
 python-multipart = "^0.0.6"
 supabase = "^2.15.1"  # Pin to specific stable version to fix proxy issues
 
