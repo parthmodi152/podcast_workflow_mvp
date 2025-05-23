@@ -14,7 +14,7 @@ psycopg2-binary = "^2.9.7"
 elevenlabs = "^2.1.0"
 pydantic = "^2.3.0"
 python-multipart = "^0.0.6"
-httpx = "^0.28.1"
+httpx = "0.28.1"
 supabase = "2.15.1"  # Pin to specific stable version to fix proxy issues
 
 [build-system]
