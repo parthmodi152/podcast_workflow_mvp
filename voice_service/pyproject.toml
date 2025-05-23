@@ -3,6 +3,7 @@ name = "voice_service"
 version = "0.1.0"
 description = "Service for cloning and cataloguing voices"
 authors = ["Manus AI"]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10"

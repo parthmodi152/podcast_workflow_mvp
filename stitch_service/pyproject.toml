@@ -3,6 +3,7 @@ name = "stitch_service"
 version = "0.1.0"
 description = "Service for concatenating video clips using FFmpeg"
 authors = ["Your Name <your.email@example.com>"]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10"

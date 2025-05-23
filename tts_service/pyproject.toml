@@ -3,6 +3,7 @@ name = "tts_service"
 version = "0.1.0"
 description = "Text-to-speech service for podcast generation"
 authors = ["Your Name <your.email@example.com>"]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10"
