@@ -1,0 +1,77 @@
+services:
+  # Voice Service
+  - type: web
+    name: podcast-voice-service
+    env: python
+    plan: free
+    buildCommand: "cd voice_service && pip install poetry && poetry config virtualenvs.create false && poetry install --only=main"
+    startCommand: "cd voice_service && uvicorn src.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+        
+  # Script Service  
+  - type: web
+    name: podcast-script-service
+    env: python
+    plan: free
+    buildCommand: "cd script_service && pip install poetry && poetry config virtualenvs.create false && poetry install --only=main"
+    startCommand: "cd script_service && uvicorn src.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+          
+  # TTS Service
+  - type: web
+    name: podcast-tts-service
+    env: python
+    plan: free
+    buildCommand: "cd tts_service && pip install poetry && poetry config virtualenvs.create false && poetry install --only=main"
+    startCommand: "cd tts_service && uvicorn src.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: MEDIA_AUDIO_DIR
+        value: "/tmp/podcast-audio"
+        
+  # Avatar Service
+  - type: web
+    name: podcast-avatar-service
+    env: python
+    plan: free
+    buildCommand: "cd avatar_service && pip install poetry && poetry config virtualenvs.create false && poetry install --only=main"
+    startCommand: "cd avatar_service && uvicorn src.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: HEDRA_API_KEY
+        sync: false
+      - key: MEDIA_AUDIO_DIR
+        value: "/tmp/podcast-audio"
+      - key: MEDIA_VIDEO_DIR
+        value: "/tmp/podcast-video"
+        
+  # Stitch Service
+  - type: web
+    name: podcast-stitch-service
+    env: python
+    plan: free
+    buildCommand: "cd stitch_service && pip install poetry && poetry config virtualenvs.create false && poetry install --only=main"
+    startCommand: "cd stitch_service && uvicorn src.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: MEDIA_VIDEO_DIR
+        value: "/tmp/podcast-video"
+      - key: MEDIA_FINAL_DIR
+        value: "/tmp/podcast-final"
+
+databases:
+  - name: podcast-postgres
+    databaseName: podcast_db
+    user: podcast_user
+    plan: free 
