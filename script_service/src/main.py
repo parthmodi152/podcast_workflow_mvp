@@ -41,10 +41,15 @@ app = FastAPI(title="Script Service")
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
+    allow_origins=[
+        "http://localhost:3000",  # Local development
+        "http://localhost:3001",  # Local development alternate port
+        "https://podcast-workflow-mvp.vercel.app",  # Vercel deployment
+        "https://*.vercel.app",  # All Vercel deployments
+    ],
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
 )
 
 
