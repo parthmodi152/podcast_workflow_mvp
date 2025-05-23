@@ -26,13 +26,25 @@ function ScriptLine({ line, index, isEditing, onEdit, onSave, onCancel, onStatus
     }
   };
 
-  const handlePlayPause = () => {
+  const handlePlayPause = async () => {
     if (!audioRef.current) {
-      audioRef.current = new Audio(scriptService.getAudioUrl(line.line_id));
+      // Get the audio URL - this will handle the redirect
+      const audioUrl = scriptService.getAudioUrl(line.line_id);
+      audioRef.current = new Audio(audioUrl);
+      
       audioRef.current.addEventListener('ended', () => setIsPlaying(false));
-      audioRef.current.addEventListener('error', () => {
+      audioRef.current.addEventListener('error', (e) => {
         setIsPlaying(false);
-        alert('Error playing audio file');
+        console.error('Audio playback error:', e);
+        alert('Error playing audio file. Please check if TTS was successful.');
+      });
+
+      // Add load event listener to handle redirects better
+      audioRef.current.addEventListener('loadstart', () => {
+        console.log('Audio loading started');
+      });
+      audioRef.current.addEventListener('canplay', () => {
+        console.log('Audio can play');
       });
     }
 
@@ -40,8 +52,14 @@ function ScriptLine({ line, index, isEditing, onEdit, onSave, onCancel, onStatus
       audioRef.current.pause();
       setIsPlaying(false);
     } else {
-      audioRef.current.play();
-      setIsPlaying(true);
+      try {
+        await audioRef.current.play();
+        setIsPlaying(true);
+      } catch (error) {
+        console.error('Failed to play audio:', error);
+        setIsPlaying(false);
+        alert('Failed to play audio. The file might not be ready yet.');
+      }
     }
   };
 
@@ -169,9 +187,20 @@ function ScriptLine({ line, index, isEditing, onEdit, onSave, onCancel, onStatus
     }
   };
 
-  const handleOpenVideo = () => {
-    const videoUrl = scriptService.getVideoUrl(line.line_id);
-    window.open(videoUrl, '_blank');
+  const handleOpenVideo = async () => {
+    try {
+      const videoUrl = scriptService.getVideoUrl(line.line_id);
+      // Test if the video URL is accessible before opening
+      const response = await fetch(videoUrl, { method: 'HEAD' });
+      if (response.ok) {
+        window.open(videoUrl, '_blank');
+      } else {
+        alert('Video file not found or not accessible yet.');
+      }
+    } catch (error) {
+      console.error('Error accessing video:', error);
+      alert('Failed to access video file. Please try again later.');
+    }
   };
 
   const getTTSStatusIcon = () => {

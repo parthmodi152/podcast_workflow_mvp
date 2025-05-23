@@ -1,12 +1,11 @@
 # /home/ubuntu/podcast_workflow_mvp/avatar_service/src/api.py
 import logging
-from fastapi import FastAPI, HTTPException, Depends, Response
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional
-import os
 import asyncio
 
 from .database import get_db
@@ -105,18 +104,17 @@ async def get_avatar_status(line_id: int, db: Session = Depends(get_db)):
 
 @app.get("/avatar/video/{line_id}")
 async def get_line_video(line_id: int, db: Session = Depends(get_db)):
-    """Serve video file for a specific line"""
+    """Redirect to video file URL in Supabase Storage"""
     line = db.query(ScriptLineModel).filter(ScriptLineModel.id == line_id).first()
 
     if not line:
         raise HTTPException(status_code=404, detail=f"Line {line_id} not found")
 
-    if not line.video_file_path or not os.path.exists(line.video_file_path):
+    if not line.video_file_path:
         raise HTTPException(status_code=404, detail="Video file not found")
 
-    return FileResponse(
-        line.video_file_path, media_type="video/mp4", filename=f"line_{line_id}.mp4"
-    )
+    # Redirect to the Supabase Storage URL (similar to TTS service)
+    return RedirectResponse(url=line.video_file_path)
 
 
 @app.get("/health")
