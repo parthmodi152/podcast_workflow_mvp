@@ -16,7 +16,7 @@ sqlalchemy = "^2.0"
 elevenlabs = "*"  # Added ElevenLabs SDK
 python-multipart = "0.0.20"
 python-dotenv = "^1.0.0"  # For loading environment variables
-supabase = "2.7.4"  # Pin to specific stable version to fix proxy issues
+supabase = "^2.15.1"  # Pin to specific stable version to fix proxy issues
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0"
