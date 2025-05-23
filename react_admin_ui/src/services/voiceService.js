@@ -1,4 +1,6 @@
-const BASE_URL = 'http://localhost:8001';
+import { API_CONFIG } from '../config';
+
+const BASE_URL = API_CONFIG.VOICE_SERVICE;
 
 export const voiceService = {
   // Fetch all voices/characters

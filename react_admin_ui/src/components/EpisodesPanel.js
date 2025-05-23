@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, Loader, Download, Play, Calendar, Clock, Users, FileVideo } from 'lucide-react';
 import { scriptService } from '../services/scriptService';
+import { API_CONFIG } from '../config';
 
 function EpisodesPanel() {
   const [episodes, setEpisodes] = useState([]);
@@ -29,7 +30,7 @@ function EpisodesPanel() {
   };
 
   const handleDownload = (scriptId, title) => {
-    const downloadUrl = `http://localhost:8005/stitch/download/${scriptId}`;
+    const downloadUrl = `${API_CONFIG.STITCH_SERVICE}/stitch/download/${scriptId}`;
     const link = document.createElement('a');
     link.href = downloadUrl;
     link.download = `${title.replace(/[^a-zA-Z0-9]/g, '_')}_episode.mp4`;
@@ -39,7 +40,7 @@ function EpisodesPanel() {
   };
 
   const handlePreview = (scriptId) => {
-    const videoUrl = `http://localhost:8005/stitch/download/${scriptId}`;
+    const videoUrl = `${API_CONFIG.STITCH_SERVICE}/stitch/download/${scriptId}`;
     window.open(videoUrl, '_blank');
   };
 

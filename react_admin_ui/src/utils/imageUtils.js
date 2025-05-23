@@ -1,3 +1,5 @@
+import { API_CONFIG } from '../config';
+
 // Generate a default placeholder image for characters
 export const generateDefaultImage = () => {
   return `data:image/svg+xml,${encodeURIComponent(`
@@ -10,7 +12,7 @@ export const generateDefaultImage = () => {
 };
 
 // Get image URL with fallback to default
-export const getImageUrl = (imagePath, baseUrl = 'http://localhost:8001') => {
+export const getImageUrl = (imagePath, baseUrl = API_CONFIG.VOICE_SERVICE) => {
   if (!imagePath) return generateDefaultImage();
   return `${baseUrl}${imagePath}`;
 };

@@ -1,7 +1,9 @@
-const BASE_URL = 'http://localhost:8002';
-const TTS_BASE_URL = 'http://localhost:8003';
-const AVATAR_BASE_URL = 'http://localhost:8004';
-const STITCH_BASE_URL = 'http://localhost:8005';
+import { API_CONFIG } from '../config';
+
+const BASE_URL = API_CONFIG.SCRIPT_SERVICE;
+const TTS_BASE_URL = API_CONFIG.TTS_SERVICE;
+const AVATAR_BASE_URL = API_CONFIG.AVATAR_SERVICE;
+const STITCH_BASE_URL = API_CONFIG.STITCH_SERVICE;
 
 export const scriptService = {
   // Fetch all scripts

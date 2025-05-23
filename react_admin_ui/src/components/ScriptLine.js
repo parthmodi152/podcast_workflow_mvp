@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Edit3, Check, X, Play, Pause, RotateCcw, Volume2, Video, ExternalLink } from 'lucide-react';
 import { getSpeakerColor } from '../utils/formatUtils';
 import { scriptService } from '../services/scriptService';
+import { API_CONFIG } from '../config';
 
 function ScriptLine({ line, index, isEditing, onEdit, onSave, onCancel, onStatusUpdate }) {
   const [editText, setEditText] = useState(line.text);
@@ -152,7 +153,7 @@ function ScriptLine({ line, index, isEditing, onEdit, onSave, onCancel, onStatus
   const tryToSyncStuckJob = async () => {
     try {
       console.log(`Attempting to sync potentially stuck job for line ${line.line_id}`);
-      const response = await fetch('http://localhost:8004/avatar/sync-stuck-jobs', {
+      const response = await fetch(`${API_CONFIG.AVATAR_SERVICE}/avatar/sync-stuck-jobs`, {
         method: 'POST'
       });
       
