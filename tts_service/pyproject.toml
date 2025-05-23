@@ -15,7 +15,7 @@ elevenlabs = "^2.1.0"
 pydantic = "^2.3.0"
 python-multipart = "^0.0.6"
 httpx = "^0.24.1"
-supabase = "^2.0.0"  # For Supabase Storage
+supabase = "2.7.4"  # Pin to specific stable version to fix proxy issues
 
 [build-system]
 requires = ["poetry-core"]

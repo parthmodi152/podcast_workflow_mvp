@@ -14,7 +14,7 @@ psycopg2-binary = "^2.9.7"
 pydantic = "^2.3.0"
 python-multipart = "^0.0.6"
 moviepy = "^2.2.0"
-supabase = "^2.0.0"  # For Supabase Storage
+supabase = "2.7.4"  # Pin to specific stable version to fix proxy issues
 httpx = "^0.24.1"  # For downloading files
 # FFmpeg is a system dependency, installed in Dockerfile
 
