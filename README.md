@@ -171,12 +171,12 @@ curl https://your-voice-service.onrender.com/voices
 curl -X POST https://your-script-service.onrender.com/scripts \
   -H "Content-Type: application/json" \
   -d '{
-    "title": "Why LLMs Matter",
-    "length_minutes": 5,
-    "speakers": [
-      {"role": "host", "voice_id": "voice_id_1"},
-      {"role": "guest", "voice_id": "voice_id_2"}
-    ]
+  "title": "Why LLMs Matter",
+  "length_minutes": 5,
+  "speakers": [
+    {"role": "host", "voice_id": "voice_id_1"},
+    {"role": "guest", "voice_id": "voice_id_2"}
+  ]
   }'
 ```
 

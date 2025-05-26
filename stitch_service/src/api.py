@@ -2,11 +2,10 @@
 import logging
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional
-import os
 
 from .database import get_db
 from .stitch_processor import check_stitch_readiness, perform_stitch
@@ -47,8 +46,8 @@ async def check_stitch_status(script_id: int, db: Session = Depends(get_db)):
     """
     Check if a script is ready for stitching.
 
-    This endpoint checks if all lines in a script have completed avatar generation
-    and returns the readiness status.
+    This endpoint checks if all lines in a script have completed avatar
+    generation and returns the readiness status.
     """
     try:
         result = check_stitch_readiness(db=db, script_id=script_id)
@@ -112,23 +111,26 @@ async def health_check():
     return {"status": "ok"}
 
 
-@app.get("/stitch/download/{script_id}", response_class=FileResponse)
+@app.get("/stitch/download/{script_id}")
 async def download_final_video(script_id: int, db: Session = Depends(get_db)):
     """
     Download the final stitched video for a script.
 
-    This endpoint downloads the final stitched video file for a script.
+    This endpoint redirects to the Supabase Storage URL for the final video.
     """
     try:
         script = db.query(ScriptModel).filter(ScriptModel.id == script_id).first()
         if not script or not script.final_video_path:
             raise HTTPException(status_code=404, detail="Final video not found")
 
-        return FileResponse(
-            path=script.final_video_path,
-            filename=os.path.basename(script.final_video_path),
-        )
+        # Clean any trailing characters from the URL
+        clean_url = script.final_video_path.rstrip("?")
 
+        # Redirect to the Supabase Storage URL
+        return RedirectResponse(url=clean_url, status_code=302)
+
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error downloading final video: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
